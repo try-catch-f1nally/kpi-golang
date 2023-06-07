@@ -38,11 +38,11 @@ func generateToken(userId uint, secretKey []byte, exp int64) (string, error) {
 	return token.SignedString(secretKey)
 }
 
-func (t *TokenService) validateAccessToken(token string) (uint, error) {
+func (t *TokenService) ValidateAccessToken(token string) (uint, error) {
 	return validateToken(token, accessTokenSecret)
 }
 
-func (t *TokenService) validateRefreshToken(token string) (uint, error) {
+func (t *TokenService) ValidateRefreshToken(token string) (uint, error) {
 	return validateToken(token, refreshTokenSecret)
 }
 

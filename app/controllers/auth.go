@@ -60,7 +60,7 @@ func (controller *AuthController) login(w http.ResponseWriter, r *http.Request) 
 func (controller *AuthController) logout(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("refreshToken")
 	if errors.Is(err, http.ErrNoCookie) {
-		http.Error(w, "Refresh token is missing", http.StatusUnauthorized)
+		http.Error(w, "refresh token is missing", http.StatusUnauthorized)
 		return
 	}
 	if err != nil {
@@ -80,7 +80,7 @@ func (controller *AuthController) logout(w http.ResponseWriter, r *http.Request)
 func (controller *AuthController) refresh(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("refreshToken")
 	if errors.Is(err, http.ErrNoCookie) {
-		http.Error(w, "Refresh token is missing", http.StatusUnauthorized)
+		http.Error(w, "refresh token is missing", http.StatusUnauthorized)
 		return
 	}
 	if err != nil {

@@ -110,7 +110,7 @@ func (service *AuthService) Login(loginBody *LoginBody) (*UserData, error) {
 }
 
 func (service *AuthService) Logout(token string) error {
-	userId, err := service.TokenService.validateRefreshToken(token)
+	userId, err := service.TokenService.ValidateRefreshToken(token)
 	if err != nil {
 		return &utils.BadRequestError{Message: "invalid refresh token provided"}
 	}
@@ -125,7 +125,7 @@ func (service *AuthService) Logout(token string) error {
 }
 
 func (service *AuthService) Refresh(token string) (*UserData, error) {
-	userId, err := service.TokenService.validateRefreshToken(token)
+	userId, err := service.TokenService.ValidateRefreshToken(token)
 	if err != nil {
 		return nil, &utils.BadRequestError{Message: "invalid refresh token provided"}
 	}

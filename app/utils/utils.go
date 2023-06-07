@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type UnauthorizedError struct {
@@ -54,4 +55,23 @@ func RespondWithJson(w http.ResponseWriter, data interface{}) {
 	if err != nil {
 		HandleError(w, err)
 	}
+}
+
+func AuthenticateRequest(r *http.Request, validateToken func(string) (uint, error)) (uint, error) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return 0, UnauthorizedError{message: "authentication failed due to missing access token"}
+	}
+
+	tokenParts := strings.Split(authHeader, " ")
+	if len(tokenParts) != 2 || strings.ToLower(tokenParts[0]) != "bearer" {
+		return 0, UnauthorizedError{message: "authentication failed due to missing access token"}
+	}
+
+	userId, err := validateToken(tokenParts[1])
+	if err != nil {
+		return 0, UnauthorizedError{message: "authentication failed due to invalid access token"}
+	}
+
+	return userId, nil
 }
