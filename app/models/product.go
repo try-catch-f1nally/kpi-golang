@@ -8,11 +8,12 @@ type GormModel struct {
 
 type Product struct {
 	GormModel
-	Type   string
-	Name   string
-	Price  int
-	Model  string
-	Memory int
-	Color  string
-	Rating int
+	Type    string   `json:"type"`
+	Name    string   `json:"name"`
+	Price   int      `json:"price"`
+	Model   string   `json:"model"`
+	Memory  int      `json:"memory"`
+	Color   string   `json:"color"`
+	Rating  int      `json:"rating"`
+	Reviews []Review `json:"reviews"`
 }
