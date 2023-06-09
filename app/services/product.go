@@ -50,3 +50,21 @@ func (service *ProductService) GetProducts(productFilter *ProductFilter) ([]mode
 
 	return products, nil
 }
+
+func (service *ProductService) RecalculateRating(productId uint) error {
+	var reviews []models.Review
+	err := service.Db.Where("product_id = ?", productId).Find(&reviews).Error
+	if err != nil {
+		return err
+	}
+	rating := 0.0
+	if len(reviews) > 0 {
+		sum := 0.0
+		for _, el := range reviews {
+			sum += float64(el.Rating)
+		}
+		rating = sum / float64(len(reviews))
+	}
+	err = service.Db.Model(&models.Product{}).Where("id = ?", productId).Update("rating", rating).Error
+	return err
+}

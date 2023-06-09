@@ -2,8 +2,10 @@ package utils
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -74,4 +76,12 @@ func AuthenticateRequest(r *http.Request, validateToken func(string) (uint, erro
 	}
 
 	return userId, nil
+}
+
+func ParseEntityIdFromParams(r *http.Request) (uint, error) {
+	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
+	if err != nil {
+		return 0, &BadRequestError{Message: "invalid entity ID"}
+	}
+	return uint(id), nil
 }

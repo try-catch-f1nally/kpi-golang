@@ -14,6 +14,6 @@ type Product struct {
 	Model   string   `json:"model"`
 	Memory  int      `json:"memory"`
 	Color   string   `json:"color"`
-	Rating  int      `json:"rating"`
+	Rating  float64  `json:"rating"`
 	Reviews []Review `json:"reviews"`
 }

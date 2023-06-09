@@ -18,13 +18,13 @@ func main() {
 	authService := &services.AuthService{Db: database, TokenService: tokenService}
 	//orderService := &services.OrderService{Db: database}
 	productService := &services.ProductService{Db: database}
-	//reviewService := &services.ReviewService{Db: database}
+	reviewService := &services.ReviewService{Db: database, ProductService: productService}
 	userService := &services.UserService{Db: database}
 
 	authController := &controllers.AuthController{AuthService: authService}
 	//orderController := controllers.OrderController{OrderService: orderService}
 	productController := &controllers.ProductController{ProductService: productService}
-	//reviewController := controllers.ReviewController{ReviewService: reviewService}
+	reviewController := &controllers.ReviewController{ReviewService: reviewService, TokenService: tokenService}
 	userController := &controllers.UserController{UserService: userService, TokenService: tokenService}
 
 	router := mux.NewRouter()
@@ -32,7 +32,7 @@ func main() {
 	authController.RegisterRoutes(apiRouter)
 	//orderController.RegisterRoutes(apiRouter)
 	productController.RegisterRoutes(apiRouter)
-	//reviewController.RegisterRoutes(apiRouter)
+	reviewController.RegisterRoutes(apiRouter)
 	userController.RegisterRoutes(apiRouter)
 
 	port := utils.GetEnvVar("PORT", "3000")
