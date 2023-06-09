@@ -34,7 +34,7 @@ func (controller *AuthController) register(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	setTokenInCookie(w, userData.RefreshToken)
 	utils.RespondWithJson(w, userData)
 }

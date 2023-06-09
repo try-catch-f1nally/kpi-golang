@@ -109,6 +109,7 @@ func (controller *UserController) changePassword(w http.ResponseWriter, r *http.
 	err = json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		utils.HandleError(w, err)
+		return
 	}
 
 	err = controller.UserService.ChangePassword(userId, body.OldPassword, body.NewPassword)

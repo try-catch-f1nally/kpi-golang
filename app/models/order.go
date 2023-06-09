@@ -6,9 +6,9 @@ import (
 
 type Order struct {
 	gorm.Model
-	UserID   string
-	Number   int `gorm:"unique;autoIncrement"`
-	Payment  string
-	Delivery string
-	Products []Product `gorm:"many2many:order_products"`
+	UserID   uint       `json:"userId"`
+	Number   uint       `json:"number" gorm:"unique;autoIncrement"`
+	Payment  string     `json:"payment"`
+	Delivery string     `json:"delivery"`
+	Products []*Product `json:"products" gorm:"many2many:order_products"`
 }

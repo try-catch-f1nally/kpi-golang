@@ -16,13 +16,13 @@ func main() {
 
 	tokenService := &services.TokenService{}
 	authService := &services.AuthService{Db: database, TokenService: tokenService}
-	//orderService := &services.OrderService{Db: database}
+	orderService := &services.OrderService{Db: database}
 	productService := &services.ProductService{Db: database}
 	reviewService := &services.ReviewService{Db: database, ProductService: productService}
 	userService := &services.UserService{Db: database}
 
 	authController := &controllers.AuthController{AuthService: authService}
-	//orderController := controllers.OrderController{OrderService: orderService}
+	orderController := controllers.OrderController{OrderService: orderService, TokenService: tokenService}
 	productController := &controllers.ProductController{ProductService: productService}
 	reviewController := &controllers.ReviewController{ReviewService: reviewService, TokenService: tokenService}
 	userController := &controllers.UserController{UserService: userService, TokenService: tokenService}
@@ -30,7 +30,7 @@ func main() {
 	router := mux.NewRouter()
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	authController.RegisterRoutes(apiRouter)
-	//orderController.RegisterRoutes(apiRouter)
+	orderController.RegisterRoutes(apiRouter)
 	productController.RegisterRoutes(apiRouter)
 	reviewController.RegisterRoutes(apiRouter)
 	userController.RegisterRoutes(apiRouter)
