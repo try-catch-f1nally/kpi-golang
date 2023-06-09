@@ -14,13 +14,11 @@ type UserService struct {
 }
 
 func (service *UserService) ChangeFirstName(userId uint, firstName string) error {
-	var user models.User
-	return service.Db.First(&user, userId).Update("first_name", firstName).Error
+	return service.Db.Model(&models.User{}).Where("id = ?", userId).Update("first_name", firstName).Error
 }
 
 func (service *UserService) ChangeLastName(userId uint, lastName string) error {
-	var user models.User
-	return service.Db.First(&user, userId).Update("last_name", lastName).Error
+	return service.Db.Model(&models.User{}).Where("id = ?", userId).Update("last_name", lastName).Error
 }
 
 func (service *UserService) ChangeEmail(userId uint, email string) error {
