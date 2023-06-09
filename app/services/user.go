@@ -46,5 +46,9 @@ func (service *UserService) ChangePassword(userId uint, oldPassword string, newP
 	}
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
 	return service.Db.First(&user, userId).Update("password", passwordHash).Error
 }
