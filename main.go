@@ -38,7 +38,7 @@ func main() {
 	port := utils.GetEnvVar("PORT", "3000")
 	server := &http.Server{
 		Handler: router,
-		Addr:    "127.0.0.1:" + port,
+		Addr:    "0.0.0.0:" + port,
 	}
 	log.Println("Application started listening on port " + port)
 	log.Fatal(server.ListenAndServe())
