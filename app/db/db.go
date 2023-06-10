@@ -15,7 +15,8 @@ func Init() *gorm.DB {
 	user := utils.GetEnvVar("DB_USER", "user")
 	password := utils.GetEnvVar("DB_PASSWORD", "password")
 	dbname := utils.GetEnvVar("DB_DBNAME", "demo")
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	sslMode := utils.GetEnvVar("DB_SSLMODE", "disable")
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", host, port, user, password, dbname, sslMode)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
