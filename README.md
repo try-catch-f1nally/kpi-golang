@@ -8,3 +8,5 @@ The main features of iGadgets API:
  - viewing products with sorting and filtering options;
  - creating orders;
  - adding reviews to products.
+
+Service is available on: https://kpi-golang-production.up.railway.app/
