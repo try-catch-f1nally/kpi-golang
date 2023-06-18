@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"kpi-golang/app/controllers"
 	"kpi-golang/app/db"
+	"kpi-golang/app/repositories"
 	"kpi-golang/app/services"
 	"kpi-golang/app/utils"
 	"log"
@@ -14,18 +15,23 @@ func main() {
 	database := db.Init()
 	log.Println("Connected to DB")
 
-	tokenService := &services.TokenService{}
-	authService := &services.AuthService{Db: database, TokenService: tokenService}
-	orderService := &services.OrderService{Db: database}
-	productService := &services.ProductService{Db: database}
-	reviewService := &services.ReviewService{Db: database, ProductService: productService}
-	userService := &services.UserService{Db: database}
+	orderRepository := repositories.NewOrderRepository(database)
+	productRepository := repositories.NewProductRepository(database)
+	reviewRepository := repositories.NewReviewRepository(database)
+	userRepository := repositories.NewUserRepository(database)
 
-	authController := &controllers.AuthController{AuthService: authService}
-	orderController := controllers.OrderController{OrderService: orderService, TokenService: tokenService}
-	productController := &controllers.ProductController{ProductService: productService}
-	reviewController := &controllers.ReviewController{ReviewService: reviewService, TokenService: tokenService}
-	userController := &controllers.UserController{UserService: userService, TokenService: tokenService}
+	tokenService := services.NewTokenService()
+	authService := services.NewAuthService(userRepository, tokenService)
+	orderService := services.NewOrderService(orderRepository, productRepository)
+	productService := services.NewProductService(productRepository, reviewRepository)
+	reviewService := services.NewReviewService(reviewRepository, productService)
+	userService := services.NewUserService(userRepository)
+
+	authController := controllers.NewAuthController(authService)
+	orderController := controllers.NewOrderController(orderService, tokenService)
+	productController := controllers.NewProductController(productService)
+	reviewController := controllers.NewReviewController(reviewService, tokenService)
+	userController := controllers.NewUserController(userService, tokenService)
 
 	router := mux.NewRouter()
 	apiRouter := router.PathPrefix("/api").Subrouter()

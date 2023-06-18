@@ -9,8 +9,12 @@ import (
 )
 
 type OrderController struct {
-	OrderService *services.OrderService
-	TokenService *services.TokenService
+	orderService *services.OrderService
+	tokenService *services.TokenService
+}
+
+func NewOrderController(orderService *services.OrderService, tokenService *services.TokenService) *OrderController {
+	return &OrderController{orderService, tokenService}
 }
 
 func (controller *OrderController) RegisterRoutes(router *mux.Router) {
@@ -19,12 +23,12 @@ func (controller *OrderController) RegisterRoutes(router *mux.Router) {
 }
 
 func (controller *OrderController) getOrders(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.TokenService.ValidateAccessToken)
+	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
 	}
-	orders, err := controller.OrderService.GetOrders(userId)
+	orders, err := controller.orderService.GetOrders(userId)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -41,7 +45,7 @@ func (controller *OrderController) createOrder(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	err = controller.OrderService.CreateOrder(&body)
+	err = controller.orderService.CreateOrder(&body)
 	if err != nil {
 		utils.HandleError(w, err)
 		return

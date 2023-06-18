@@ -9,33 +9,46 @@ import (
 	"kpi-golang/app/utils"
 )
 
+type UserRepository interface {
+	UserCreate(user *models.User) error
+	UserGet(userId uint) (*models.User, error)
+	UserGetByEmail(email string) (*models.User, error)
+	UserUpdateFirstName(userId uint, firstName string) error
+	UserUpdateLastName(userId uint, lastName string) error
+	UserUpdateEmail(userId uint, email string) error
+	UserUpdatePassword(userId uint, password []byte) error
+	UserUpdateToken(userId uint, token string) error
+}
+
 type UserService struct {
-	Db *gorm.DB
+	userRepository UserRepository
+}
+
+func NewUserService(userRepository UserRepository) *UserService {
+	return &UserService{userRepository}
 }
 
 func (service *UserService) ChangeFirstName(userId uint, firstName string) error {
-	return service.Db.Model(&models.User{}).Where("id = ?", userId).Update("first_name", firstName).Error
+	return service.userRepository.UserUpdateFirstName(userId, firstName)
 }
 
 func (service *UserService) ChangeLastName(userId uint, lastName string) error {
-	return service.Db.Model(&models.User{}).Where("id = ?", userId).Update("last_name", lastName).Error
+	return service.userRepository.UserUpdateLastName(userId, lastName)
 }
 
 func (service *UserService) ChangeEmail(userId uint, email string) error {
-	var user models.User
-	err := service.Db.Where("email = ?", email).First(&user).Error
+	_, err := service.userRepository.UserGetByEmail(email)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	if err == nil {
 		return &utils.BadRequestError{Message: fmt.Sprintf("user with email %q already exists", email)}
 	}
-	return service.Db.First(&user, userId).Update("email", email).Error
+	return service.userRepository.UserUpdateEmail(userId, email)
 }
 
 func (service *UserService) ChangePassword(userId uint, oldPassword string, newPassword string) error {
-	var user models.User
-	err := service.Db.First(&user, userId).Error
+	user, err := service.userRepository.UserGet(userId)
 	if err != nil {
 		return err
 	}
@@ -50,5 +63,5 @@ func (service *UserService) ChangePassword(userId uint, oldPassword string, newP
 		return err
 	}
 
-	return service.Db.First(&user, userId).Update("password", passwordHash).Error
+	return service.userRepository.UserUpdatePassword(userId, passwordHash)
 }

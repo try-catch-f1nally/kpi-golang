@@ -9,6 +9,10 @@ import (
 
 type TokenService struct{}
 
+func NewTokenService() *TokenService {
+	return &TokenService{}
+}
+
 type Tokens struct {
 	accessToken  string
 	refreshToken string

@@ -7,9 +7,20 @@ import (
 	"kpi-golang/app/utils"
 )
 
+type ReviewRepository interface {
+	ReviewCreate(review *models.Review) error
+	ReviewGet(reviewId uint) (*models.Review, error)
+	ReviewGetByProductId(productId uint) ([]*models.Review, error)
+	ReviewDelete(reviewId uint) error
+}
+
 type ReviewService struct {
-	Db             *gorm.DB
-	ProductService *ProductService
+	reviewRepository ReviewRepository
+	productService   *ProductService
+}
+
+func NewReviewService(reviewRepository ReviewRepository, productService *ProductService) *ReviewService {
+	return &ReviewService{reviewRepository, productService}
 }
 
 type CreateReviewBody struct {
@@ -20,22 +31,20 @@ type CreateReviewBody struct {
 }
 
 func (service *ReviewService) Create(reviewBody *CreateReviewBody) error {
-	review := models.Review{
+	err := service.reviewRepository.ReviewCreate(&models.Review{
 		UserID:    reviewBody.UserID,
 		ProductID: reviewBody.ProductID,
 		Rating:    reviewBody.Rating,
 		Text:      reviewBody.Text,
-	}
-	err := service.Db.Create(&review).Error
+	})
 	if err != nil {
 		return err
 	}
-	return service.ProductService.RecalculateRating(reviewBody.ProductID)
+	return service.productService.RecalculateRating(reviewBody.ProductID)
 }
 
 func (service *ReviewService) Delete(reviewId uint, userId uint) error {
-	var review models.Review
-	err := service.Db.First(&review, reviewId).Error
+	review, err := service.reviewRepository.ReviewGet(reviewId)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return &utils.BadRequestError{Message: "wrong review ID"}
 	}
@@ -46,10 +55,10 @@ func (service *ReviewService) Delete(reviewId uint, userId uint) error {
 		return &utils.BadRequestError{Message: "deleting review of another user is not allowed"}
 	}
 
-	err = service.Db.Delete(&models.Review{}, reviewId).Error
+	err = service.reviewRepository.ReviewDelete(reviewId)
 	if err != nil {
 		return err
 	}
 
-	return service.ProductService.RecalculateRating(review.ProductID)
+	return service.productService.RecalculateRating(review.ProductID)
 }

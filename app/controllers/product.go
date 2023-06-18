@@ -10,7 +10,11 @@ import (
 )
 
 type ProductController struct {
-	ProductService *services.ProductService
+	productService *services.ProductService
+}
+
+func NewProductController(productService *services.ProductService) *ProductController {
+	return &ProductController{productService}
 }
 
 func (controller *ProductController) RegisterRoutes(router *mux.Router) {
@@ -68,7 +72,7 @@ func (controller *ProductController) getProducts(w http.ResponseWriter, r *http.
 		productFilter.Limit = limit
 	}
 
-	products, err := controller.ProductService.GetProducts(productFilter)
+	products, err := controller.productService.GetProducts(productFilter)
 	if err != nil {
 		utils.HandleError(w, err)
 		return

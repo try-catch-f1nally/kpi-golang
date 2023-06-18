@@ -9,8 +9,12 @@ import (
 )
 
 type UserController struct {
-	UserService  *services.UserService
-	TokenService *services.TokenService
+	userService  *services.UserService
+	tokenService *services.TokenService
+}
+
+func NewUserController(userService *services.UserService, tokenService *services.TokenService) *UserController {
+	return &UserController{userService, tokenService}
 }
 
 func (controller *UserController) RegisterRoutes(router *mux.Router) {
@@ -21,7 +25,7 @@ func (controller *UserController) RegisterRoutes(router *mux.Router) {
 }
 
 func (controller *UserController) changeFirstName(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.TokenService.ValidateAccessToken)
+	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -36,7 +40,7 @@ func (controller *UserController) changeFirstName(w http.ResponseWriter, r *http
 		return
 	}
 
-	err = controller.UserService.ChangeFirstName(userId, body.FirstName)
+	err = controller.userService.ChangeFirstName(userId, body.FirstName)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -46,7 +50,7 @@ func (controller *UserController) changeFirstName(w http.ResponseWriter, r *http
 }
 
 func (controller *UserController) changeLastName(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.TokenService.ValidateAccessToken)
+	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -61,7 +65,7 @@ func (controller *UserController) changeLastName(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = controller.UserService.ChangeLastName(userId, body.LastName)
+	err = controller.userService.ChangeLastName(userId, body.LastName)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -71,7 +75,7 @@ func (controller *UserController) changeLastName(w http.ResponseWriter, r *http.
 }
 
 func (controller *UserController) changeEmail(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.TokenService.ValidateAccessToken)
+	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -86,7 +90,7 @@ func (controller *UserController) changeEmail(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = controller.UserService.ChangeEmail(userId, body.Email)
+	err = controller.userService.ChangeEmail(userId, body.Email)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -96,7 +100,7 @@ func (controller *UserController) changeEmail(w http.ResponseWriter, r *http.Req
 }
 
 func (controller *UserController) changePassword(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.TokenService.ValidateAccessToken)
+	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -112,7 +116,7 @@ func (controller *UserController) changePassword(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = controller.UserService.ChangePassword(userId, body.OldPassword, body.NewPassword)
+	err = controller.userService.ChangePassword(userId, body.OldPassword, body.NewPassword)
 	if err != nil {
 		utils.HandleError(w, err)
 		return

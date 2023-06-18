@@ -10,8 +10,12 @@ import (
 )
 
 type AuthService struct {
-	Db           *gorm.DB
-	TokenService *TokenService
+	userRepository UserRepository
+	tokenService   *TokenService
+}
+
+func NewAuthService(userRepository UserRepository, tokenService *TokenService) *AuthService {
+	return &AuthService{userRepository, tokenService}
 }
 
 type UserData struct {
@@ -33,8 +37,7 @@ type LoginBody struct {
 }
 
 func (service *AuthService) Register(registerBody *RegisterBody) (*UserData, error) {
-	var user models.User
-	err := service.Db.Where("email = ?", registerBody.Email).First(&user).Error
+	_, err := service.userRepository.UserGetByEmail(registerBody.Email)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -48,24 +51,24 @@ func (service *AuthService) Register(registerBody *RegisterBody) (*UserData, err
 	if err != nil {
 		return nil, err
 	}
-	user = models.User{
+	user := &models.User{
 		Email:     registerBody.Email,
 		Password:  passwordHash,
 		FirstName: registerBody.FirstName,
 		LastName:  registerBody.LastName,
 	}
 
-	err = service.Db.Create(&user).Error
+	err = service.userRepository.UserCreate(user)
 	if err != nil {
 		return nil, err
 	}
 
-	tokens, err := service.TokenService.GenerateTokens(user.ID)
+	tokens, err := service.tokenService.GenerateTokens(user.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	err = service.Db.Model(&user).Update("token", tokens.refreshToken).Error
+	err = service.userRepository.UserUpdateToken(user.ID, tokens.refreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +81,7 @@ func (service *AuthService) Register(registerBody *RegisterBody) (*UserData, err
 }
 
 func (service *AuthService) Login(loginBody *LoginBody) (*UserData, error) {
-	var user models.User
-	err := service.Db.Where("email = ?", loginBody.Email).First(&user).Error
+	user, err := service.userRepository.UserGetByEmail(loginBody.Email)
 	wrongEmailOrPasswordError := &utils.BadRequestError{Message: "wrong email or password"}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, wrongEmailOrPasswordError
@@ -92,12 +94,12 @@ func (service *AuthService) Login(loginBody *LoginBody) (*UserData, error) {
 		return nil, wrongEmailOrPasswordError
 	}
 
-	tokens, err := service.TokenService.GenerateTokens(user.ID)
+	tokens, err := service.tokenService.GenerateTokens(user.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	err = service.Db.Model(&user).Update("token", tokens.refreshToken).Error
+	err = service.userRepository.UserUpdateToken(user.ID, tokens.refreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -110,28 +112,26 @@ func (service *AuthService) Login(loginBody *LoginBody) (*UserData, error) {
 }
 
 func (service *AuthService) Logout(token string) error {
-	userId, err := service.TokenService.ValidateRefreshToken(token)
+	userId, err := service.tokenService.ValidateRefreshToken(token)
 	if err != nil {
 		return &utils.BadRequestError{Message: "invalid refresh token provided"}
 	}
 
-	var user models.User
-	err = service.Db.First(&user, userId).Error
+	_, err = service.userRepository.UserGet(userId)
 	if err != nil {
 		return err
 	}
 
-	return service.Db.Model(&user).Update("token", nil).Error
+	return service.userRepository.UserUpdateToken(userId, "")
 }
 
 func (service *AuthService) Refresh(token string) (*UserData, error) {
-	userId, err := service.TokenService.ValidateRefreshToken(token)
+	userId, err := service.tokenService.ValidateRefreshToken(token)
 	if err != nil {
 		return nil, &utils.BadRequestError{Message: "invalid refresh token provided"}
 	}
 
-	var user models.User
-	err = service.Db.First(&user, userId).Error
+	user, err := service.userRepository.UserGet(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -141,17 +141,17 @@ func (service *AuthService) Refresh(token string) (*UserData, error) {
 		return nil, &utils.BadRequestError{Message: "invalid refresh token provided"}
 	}
 
-	err = service.Db.Model(&user).Update("token", nil).Error
+	err = service.userRepository.UserUpdateToken(userId, "")
 	if err != nil {
 		return nil, err
 	}
 
-	tokens, err := service.TokenService.GenerateTokens(user.ID)
+	tokens, err := service.tokenService.GenerateTokens(user.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	err = service.Db.Model(&user).Update("token", tokens.refreshToken).Error
+	err = service.userRepository.UserUpdateToken(userId, tokens.refreshToken)
 	if err != nil {
 		return nil, err
 	}

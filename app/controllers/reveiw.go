@@ -9,8 +9,12 @@ import (
 )
 
 type ReviewController struct {
-	ReviewService *services.ReviewService
-	TokenService  *services.TokenService
+	reviewService *services.ReviewService
+	tokenService  *services.TokenService
+}
+
+func NewReviewController(reviewService *services.ReviewService, tokenService *services.TokenService) *ReviewController {
+	return &ReviewController{reviewService, tokenService}
 }
 
 func (controller *ReviewController) RegisterRoutes(router *mux.Router) {
@@ -19,7 +23,7 @@ func (controller *ReviewController) RegisterRoutes(router *mux.Router) {
 }
 
 func (controller *ReviewController) postReview(w http.ResponseWriter, r *http.Request) {
-	userIdInToken, err := utils.AuthenticateRequest(r, controller.TokenService.ValidateAccessToken)
+	userIdInToken, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -36,7 +40,7 @@ func (controller *ReviewController) postReview(w http.ResponseWriter, r *http.Re
 		http.Error(w, "posting review for another user is not allowed", http.StatusBadRequest)
 	}
 
-	err = controller.ReviewService.Create(&body)
+	err = controller.reviewService.Create(&body)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -46,7 +50,7 @@ func (controller *ReviewController) postReview(w http.ResponseWriter, r *http.Re
 }
 
 func (controller *ReviewController) deleteReview(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.TokenService.ValidateAccessToken)
+	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -58,7 +62,7 @@ func (controller *ReviewController) deleteReview(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = controller.ReviewService.Delete(reviewId, userId)
+	err = controller.reviewService.Delete(reviewId, userId)
 	if err != nil {
 		utils.HandleError(w, err)
 		return

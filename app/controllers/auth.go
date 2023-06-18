@@ -10,7 +10,11 @@ import (
 )
 
 type AuthController struct {
-	AuthService *services.AuthService
+	authService *services.AuthService
+}
+
+func NewAuthController(authService *services.AuthService) *AuthController {
+	return &AuthController{authService}
 }
 
 func (controller *AuthController) RegisterRoutes(router *mux.Router) {
@@ -28,7 +32,7 @@ func (controller *AuthController) register(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	userData, err := controller.AuthService.Register(&body)
+	userData, err := controller.authService.Register(&body)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -47,7 +51,7 @@ func (controller *AuthController) login(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	userData, err := controller.AuthService.Login(&body)
+	userData, err := controller.authService.Login(&body)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -70,7 +74,7 @@ func (controller *AuthController) logout(w http.ResponseWriter, r *http.Request)
 
 	unsetTokenInCookie(w)
 
-	err = controller.AuthService.Logout(cookie.Value)
+	err = controller.authService.Logout(cookie.Value)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -90,7 +94,7 @@ func (controller *AuthController) refresh(w http.ResponseWriter, r *http.Request
 
 	unsetTokenInCookie(w)
 
-	userData, err := controller.AuthService.Refresh(cookie.Value)
+	userData, err := controller.authService.Refresh(cookie.Value)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
