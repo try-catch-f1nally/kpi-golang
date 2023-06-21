@@ -28,9 +28,9 @@ func (e BadRequestError) Error() string {
 func HandleError(w http.ResponseWriter, err error) {
 	var statusCode int
 	switch err.(type) {
-	case UnauthorizedError:
+	case *UnauthorizedError:
 		statusCode = http.StatusUnauthorized
-	case BadRequestError:
+	case *BadRequestError:
 		statusCode = http.StatusBadRequest
 	default:
 		statusCode = http.StatusInternalServerError
