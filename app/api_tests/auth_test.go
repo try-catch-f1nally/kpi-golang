@@ -1,3 +1,5 @@
+//go:build api_test
+
 package api_tests
 
 import (
@@ -13,7 +15,7 @@ import (
 	"testing"
 )
 
-func TestAll(t *testing.T) {
+func TestAuthAll(t *testing.T) {
 	database := db.Init()
 	userRepository := repositories.NewUserRepository(database)
 	tokenService := services.NewTokenService()
