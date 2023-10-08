@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"kpi-golang/app/services"
+	"kpi-golang/app/core/services"
 	"kpi-golang/app/utils"
 	"net/http"
 )
@@ -25,7 +25,7 @@ func (controller *UserController) RegisterRoutes(router *mux.Router) {
 }
 
 func (controller *UserController) changeFirstName(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
+	userID, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -40,7 +40,7 @@ func (controller *UserController) changeFirstName(w http.ResponseWriter, r *http
 		return
 	}
 
-	err = controller.userService.ChangeFirstName(userId, body.FirstName)
+	err = controller.userService.ChangeFirstName(userID, body.FirstName)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -50,7 +50,7 @@ func (controller *UserController) changeFirstName(w http.ResponseWriter, r *http
 }
 
 func (controller *UserController) changeLastName(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
+	userID, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -65,7 +65,7 @@ func (controller *UserController) changeLastName(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = controller.userService.ChangeLastName(userId, body.LastName)
+	err = controller.userService.ChangeLastName(userID, body.LastName)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -75,7 +75,7 @@ func (controller *UserController) changeLastName(w http.ResponseWriter, r *http.
 }
 
 func (controller *UserController) changeEmail(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
+	userID, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -90,7 +90,7 @@ func (controller *UserController) changeEmail(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = controller.userService.ChangeEmail(userId, body.Email)
+	err = controller.userService.ChangeEmail(userID, body.Email)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -100,7 +100,7 @@ func (controller *UserController) changeEmail(w http.ResponseWriter, r *http.Req
 }
 
 func (controller *UserController) changePassword(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
+	userID, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -116,7 +116,7 @@ func (controller *UserController) changePassword(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = controller.userService.ChangePassword(userId, body.OldPassword, body.NewPassword)
+	err = controller.userService.ChangePassword(userID, body.OldPassword, body.NewPassword)
 	if err != nil {
 		utils.HandleError(w, err)
 		return

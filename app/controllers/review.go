@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"kpi-golang/app/services"
+	"kpi-golang/app/core/services"
 	"kpi-golang/app/utils"
 	"net/http"
 )
@@ -23,7 +23,7 @@ func (controller *ReviewController) RegisterRoutes(router *mux.Router) {
 }
 
 func (controller *ReviewController) postReview(w http.ResponseWriter, r *http.Request) {
-	userIdInToken, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
+	userIDInToken, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
@@ -36,7 +36,7 @@ func (controller *ReviewController) postReview(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if userIdInToken != body.UserID {
+	if userIDInToken != body.UserID {
 		http.Error(w, "posting review for another user is not allowed", http.StatusBadRequest)
 	}
 
@@ -50,19 +50,19 @@ func (controller *ReviewController) postReview(w http.ResponseWriter, r *http.Re
 }
 
 func (controller *ReviewController) deleteReview(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
+	userID, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
 	}
 
-	reviewId, err := utils.ParseEntityIdFromParams(r)
+	reviewID, err := utils.ParseEntityIdFromParams(r)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
 	}
 
-	err = controller.reviewService.Delete(reviewId, userId)
+	err = controller.reviewService.Delete(reviewID, userID)
 	if err != nil {
 		utils.HandleError(w, err)
 		return

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
-	"kpi-golang/app/services"
+	"kpi-golang/app/core/services"
 	"kpi-golang/app/utils"
 	"net/http"
 )

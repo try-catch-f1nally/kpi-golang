@@ -3,34 +3,19 @@ package utils
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"kpi-golang/app/core"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 )
 
-type UnauthorizedError struct {
-	message string
-}
-
-type BadRequestError struct {
-	Message string
-}
-
-func (e UnauthorizedError) Error() string {
-	return e.message
-}
-
-func (e BadRequestError) Error() string {
-	return e.Message
-}
-
 func HandleError(w http.ResponseWriter, err error) {
 	var statusCode int
 	switch err.(type) {
-	case UnauthorizedError:
+	case core.UnauthorizedError:
 		statusCode = http.StatusUnauthorized
-	case BadRequestError:
+	case core.BadRequestError:
 		statusCode = http.StatusBadRequest
 	default:
 		statusCode = http.StatusInternalServerError
@@ -62,26 +47,26 @@ func RespondWithJson(w http.ResponseWriter, data interface{}) {
 func AuthenticateRequest(r *http.Request, validateToken func(string) (uint, error)) (uint, error) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
-		return 0, UnauthorizedError{message: "authentication failed due to missing access token"}
+		return 0, core.UnauthorizedError{Message: "authentication failed due to missing access token"}
 	}
 
 	tokenParts := strings.Split(authHeader, " ")
 	if len(tokenParts) != 2 || strings.ToLower(tokenParts[0]) != "bearer" {
-		return 0, UnauthorizedError{message: "authentication failed due to missing access token"}
+		return 0, core.UnauthorizedError{Message: "authentication failed due to missing access token"}
 	}
 
-	userId, err := validateToken(tokenParts[1])
+	userID, err := validateToken(tokenParts[1])
 	if err != nil {
-		return 0, UnauthorizedError{message: "authentication failed due to invalid access token"}
+		return 0, core.UnauthorizedError{Message: "authentication failed due to invalid access token"}
 	}
 
-	return userId, nil
+	return userID, nil
 }
 
 func ParseEntityIdFromParams(r *http.Request) (uint, error) {
 	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
-		return 0, &BadRequestError{Message: "invalid entity ID"}
+		return 0, &core.BadRequestError{Message: "invalid entity ID"}
 	}
 	return uint(id), nil
 }

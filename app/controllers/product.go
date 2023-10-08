@@ -2,7 +2,8 @@ package controllers
 
 import (
 	"github.com/gorilla/mux"
-	"kpi-golang/app/services"
+	"kpi-golang/app/core/repositories"
+	"kpi-golang/app/core/services"
 	"kpi-golang/app/utils"
 	"net/http"
 	"strconv"
@@ -22,7 +23,7 @@ func (controller *ProductController) RegisterRoutes(router *mux.Router) {
 }
 
 func (controller *ProductController) getProducts(w http.ResponseWriter, r *http.Request) {
-	productFilter := &services.ProductFilter{}
+	productFilter := &repositories.ProductFilter{}
 
 	types := r.URL.Query().Get("type")
 	if types != "" {

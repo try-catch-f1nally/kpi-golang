@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"kpi-golang/app/services"
+	"kpi-golang/app/core/services"
 	"kpi-golang/app/utils"
 	"net/http"
 )
@@ -23,12 +23,12 @@ func (controller *OrderController) RegisterRoutes(router *mux.Router) {
 }
 
 func (controller *OrderController) getOrders(w http.ResponseWriter, r *http.Request) {
-	userId, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
+	userID, err := utils.AuthenticateRequest(r, controller.tokenService.ValidateAccessToken)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
 	}
-	orders, err := controller.orderService.GetOrders(userId)
+	orders, err := controller.orderService.GetOrders(userID)
 	if err != nil {
 		utils.HandleError(w, err)
 		return

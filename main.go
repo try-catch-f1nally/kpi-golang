@@ -3,9 +3,9 @@ package main
 import (
 	"github.com/gorilla/mux"
 	"kpi-golang/app/controllers"
+	"kpi-golang/app/core/services"
 	"kpi-golang/app/db"
-	"kpi-golang/app/repositories"
-	"kpi-golang/app/services"
+	"kpi-golang/app/db/repositories"
 	"kpi-golang/app/utils"
 	"log"
 	"net/http"

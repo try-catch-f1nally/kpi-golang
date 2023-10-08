@@ -2,8 +2,8 @@ package repositories
 
 import (
 	"gorm.io/gorm"
-	"kpi-golang/app/models"
-	"kpi-golang/app/services"
+	"kpi-golang/app/core/models"
+	"kpi-golang/app/core/repositories"
 )
 
 type ProductRepository struct {
@@ -14,16 +14,16 @@ func NewProductRepository(db *gorm.DB) *ProductRepository {
 	return &ProductRepository{db}
 }
 
-func (repo *ProductRepository) ProductGetByIds(productIds []uint) ([]*models.Product, error) {
+func (repo *ProductRepository) GetByIDs(productIDs []uint) ([]*models.Product, error) {
 	var products []*models.Product
-	err := repo.db.Find(&products, productIds).Error
+	err := repo.db.Find(&products, productIDs).Error
 	if err != nil {
 		return nil, err
 	}
 	return products, nil
 }
 
-func (repo *ProductRepository) ProductGetByFilter(productFilter *services.ProductFilter) ([]*models.Product, error) {
+func (repo *ProductRepository) GetByFilter(productFilter *repositories.ProductFilter) ([]*models.Product, error) {
 	var products []*models.Product
 	db := repo.db.Preload("Reviews")
 
@@ -55,6 +55,6 @@ func (repo *ProductRepository) ProductGetByFilter(productFilter *services.Produc
 	return products, nil
 }
 
-func (repo *ProductRepository) ProductUpdateRating(productId uint, rating float64) error {
-	return repo.db.Model(&models.Product{}).Where("id = ?", productId).Update("rating", rating).Error
+func (repo *ProductRepository) UpdateRating(productID uint, rating float64) error {
+	return repo.db.Model(&models.Product{}).Where("id = ?", productID).Update("rating", rating).Error
 }

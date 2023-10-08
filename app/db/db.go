@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"kpi-golang/app/models"
+	"kpi-golang/app/core/models"
 	"kpi-golang/app/utils"
 	"log"
 )

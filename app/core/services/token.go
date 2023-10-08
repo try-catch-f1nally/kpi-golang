@@ -23,13 +23,13 @@ var refreshTokenSecret = []byte(utils.GetEnvVar("REFRESH_TOKEN_SECRET", "refresh
 var AccessTokenExp = time.Now().Add(time.Minute * 30).Unix()
 var RefreshTokenExp = time.Now().Add(time.Hour * 24 * 30).Unix()
 
-func (t *TokenService) GenerateTokens(userId uint) (*Tokens, error) {
-	accessToken, err := generateToken(userId, accessTokenSecret, AccessTokenExp)
+func (t *TokenService) GenerateTokens(userID uint) (*Tokens, error) {
+	accessToken, err := generateToken(userID, accessTokenSecret, AccessTokenExp)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := generateToken(userId, refreshTokenSecret, RefreshTokenExp)
+	refreshToken, err := generateToken(userID, refreshTokenSecret, RefreshTokenExp)
 	if err != nil {
 		return nil, err
 	}
@@ -37,8 +37,8 @@ func (t *TokenService) GenerateTokens(userId uint) (*Tokens, error) {
 	return &Tokens{accessToken: accessToken, refreshToken: refreshToken}, nil
 }
 
-func generateToken(userId uint, secretKey []byte, exp int64) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"exp": exp, "sub": userId})
+func generateToken(userID uint, secretKey []byte, exp int64) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"exp": exp, "sub": userID})
 	return token.SignedString(secretKey)
 }
 
@@ -67,9 +67,9 @@ func validateToken(token string, secretKey []byte) (uint, error) {
 		return 0, invalidTokenError
 	}
 
-	userId, ok := claims["sub"].(float64)
+	userID, ok := claims["sub"].(float64)
 	if !ok {
 		return 0, invalidTokenError
 	}
-	return uint(userId), nil
+	return uint(userID), nil
 }

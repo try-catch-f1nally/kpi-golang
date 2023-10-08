@@ -5,16 +5,17 @@ import (
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"kpi-golang/app/models"
-	"kpi-golang/app/utils"
+	"kpi-golang/app/core"
+	"kpi-golang/app/core/models"
+	"kpi-golang/app/core/repositories"
 )
 
 type AuthService struct {
-	userRepository UserRepository
+	userRepository repositories.UserRepository
 	tokenService   *TokenService
 }
 
-func NewAuthService(userRepository UserRepository, tokenService *TokenService) *AuthService {
+func NewAuthService(userRepository repositories.UserRepository, tokenService *TokenService) *AuthService {
 	return &AuthService{userRepository, tokenService}
 }
 
@@ -37,12 +38,12 @@ type LoginBody struct {
 }
 
 func (service *AuthService) Register(registerBody *RegisterBody) (*UserData, error) {
-	_, err := service.userRepository.UserGetByEmail(registerBody.Email)
+	_, err := service.userRepository.GetByEmail(registerBody.Email)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 	if err == nil {
-		return nil, &utils.BadRequestError{
+		return nil, &core.BadRequestError{
 			Message: fmt.Sprintf("user with email %q already exists", registerBody.Email),
 		}
 	}
@@ -58,7 +59,7 @@ func (service *AuthService) Register(registerBody *RegisterBody) (*UserData, err
 		LastName:  registerBody.LastName,
 	}
 
-	err = service.userRepository.UserCreate(user)
+	err = service.userRepository.Create(user)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func (service *AuthService) Register(registerBody *RegisterBody) (*UserData, err
 		return nil, err
 	}
 
-	err = service.userRepository.UserUpdateToken(user.ID, tokens.refreshToken)
+	err = service.userRepository.UpdateToken(user.ID, tokens.refreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +82,8 @@ func (service *AuthService) Register(registerBody *RegisterBody) (*UserData, err
 }
 
 func (service *AuthService) Login(loginBody *LoginBody) (*UserData, error) {
-	user, err := service.userRepository.UserGetByEmail(loginBody.Email)
-	wrongEmailOrPasswordError := &utils.BadRequestError{Message: "wrong email or password"}
+	user, err := service.userRepository.GetByEmail(loginBody.Email)
+	wrongEmailOrPasswordError := &core.BadRequestError{Message: "wrong email or password"}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, wrongEmailOrPasswordError
 	} else if err != nil {
@@ -99,7 +100,7 @@ func (service *AuthService) Login(loginBody *LoginBody) (*UserData, error) {
 		return nil, err
 	}
 
-	err = service.userRepository.UserUpdateToken(user.ID, tokens.refreshToken)
+	err = service.userRepository.UpdateToken(user.ID, tokens.refreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -112,36 +113,36 @@ func (service *AuthService) Login(loginBody *LoginBody) (*UserData, error) {
 }
 
 func (service *AuthService) Logout(token string) error {
-	userId, err := service.tokenService.ValidateRefreshToken(token)
+	userID, err := service.tokenService.ValidateRefreshToken(token)
 	if err != nil {
-		return &utils.BadRequestError{Message: "invalid refresh token provided"}
+		return &core.BadRequestError{Message: "invalid refresh token provided"}
 	}
 
-	_, err = service.userRepository.UserGet(userId)
+	_, err = service.userRepository.Get(userID)
 	if err != nil {
 		return err
 	}
 
-	return service.userRepository.UserUpdateToken(userId, "")
+	return service.userRepository.UpdateToken(userID, "")
 }
 
 func (service *AuthService) Refresh(token string) (*UserData, error) {
-	userId, err := service.tokenService.ValidateRefreshToken(token)
+	userID, err := service.tokenService.ValidateRefreshToken(token)
 	if err != nil {
-		return nil, &utils.BadRequestError{Message: "invalid refresh token provided"}
+		return nil, &core.BadRequestError{Message: "invalid refresh token provided"}
 	}
 
-	user, err := service.userRepository.UserGet(userId)
+	user, err := service.userRepository.Get(userID)
 	if err != nil {
 		return nil, err
 	}
 
 	currentToken := user.Token
 	if currentToken != token {
-		return nil, &utils.BadRequestError{Message: "invalid refresh token provided"}
+		return nil, &core.BadRequestError{Message: "invalid refresh token provided"}
 	}
 
-	err = service.userRepository.UserUpdateToken(userId, "")
+	err = service.userRepository.UpdateToken(userID, "")
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +152,7 @@ func (service *AuthService) Refresh(token string) (*UserData, error) {
 		return nil, err
 	}
 
-	err = service.userRepository.UserUpdateToken(userId, tokens.refreshToken)
+	err = service.userRepository.UpdateToken(userID, tokens.refreshToken)
 	if err != nil {
 		return nil, err
 	}
